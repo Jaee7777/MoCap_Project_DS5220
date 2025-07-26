@@ -20,7 +20,7 @@ def read_data(file_pos="data/01_01_pos.csv", file_rot="data/01_01_rot.csv"):
     return df, df_pos, df_rot, joints_number, joints_name
 
 
-def plot_frame(frame, joints_number, joints_name, ax):
+def plot_frame(frame, df, joints_number, joints_name, ax):
     plt.cla()
     X = []
     Y = []
@@ -32,14 +32,39 @@ def plot_frame(frame, joints_number, joints_name, ax):
         Z.append(df.iloc[frame, 3 * i + 3])
 
     i = 0
+    joints_mp = [
+        "lhipjoint",
+        "lfemur",
+        "ltibia",
+        "lfoot",
+        "ltoes",
+        "rhipjoint",
+        "rfemur",
+        "rtibia",
+        "rfoot",
+        "rtoes",
+        "head",
+        "lhumerus",
+        "lradius",
+        "lwrist",
+        "lfingers",
+        "lthumb",
+        "rhumerus",
+        "rradius",
+        "rwrist",
+        "rfingers",
+        "rthumb",
+    ]
     for joint in joints_name:
         if joint == "root":
             marker, size = "X", 100
         elif joint == "head":
-            marker, size = "o", 1000
-        else:
+            marker, size = "o", 500
+        elif joint in joints_mp:
             marker, size = "o", 50
-        ax.scatter(X[i], Y[i], Z[i], marker=marker, s=size)
+        else:
+            marker, size = "x", 100
+        ax.scatter(X[i], Y[i], Z[i], marker=marker, s=size, label=joints_name[i])
         # ax.scatter(X[i], Y[i], Z[i], marker="o", label=joints_name[i])
         i += 1
 
@@ -105,14 +130,19 @@ if __name__ == "__main__":
     df, df_pos, df_rot, joints_number, joints_name = read_data(
         file_pos=file_pos, file_rot=file_rot
     )
+    print(joints_name)
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
-    # plot_frame(frame=0, joints_number=joints_number, joints_name=joints_name, ax=ax)
+    plot_frame(
+        frame=0, df=df, joints_number=joints_number, joints_name=joints_name, ax=ax
+    )
+    """
     ani = animation.FuncAnimation(
         fig=fig,
         func=plot_frame,
-        fargs=(joints_number, joints_name, ax),
+        fargs=(df, joints_number, joints_name, ax),
         interval=8.333,
-    )
+    )"""
+    plt.legend()
     plt.show()
