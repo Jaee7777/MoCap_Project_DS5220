@@ -5,7 +5,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
 
 
-def read_data(file_pos="data/01_01_pos.csv", file_rot="data/01_01_rot.csv"):
+def read_CMU_data(file_pos="data/01_01_pos.csv", file_rot="data/01_01_rot.csv"):
+    scale = (1.0 / 0.45) * 2.54 / 100.0  # scale from CMU mocap.
+
     df_pos = pd.read_csv(file_pos)
     df_rot = pd.read_csv(file_rot)
 
@@ -17,19 +19,24 @@ def read_data(file_pos="data/01_01_pos.csv", file_rot="data/01_01_rot.csv"):
     for i in range(joints_number):
         joints_name.append(df_pos.columns[3 * i + 1][:-2])
     # print(joints_name)
+
+    col_scale = df.columns.difference(["time"])  # exclude time column
+    df[col_scale] = df[col_scale] * scale
+    col_pos_scale = df_pos.columns.difference(["time"])  # exclude time column
+    df_pos[col_pos_scale] = df_pos[col_pos_scale] * scale
     return df, df_pos, df_rot, joints_number, joints_name
 
 
-def plot_frame(frame, df, joints_number, joints_name, ax):
+def plot_3d(frame, df, joints_number, joints_name, ax):
     plt.cla()
     X = []
     Y = []
     Z = []
 
     for i in range(joints_number):
-        X.append(df.iloc[frame, 3 * i + 1])
-        Y.append(df.iloc[frame, 3 * i + 2])
-        Z.append(df.iloc[frame, 3 * i + 3])
+        X.append(df.iloc[frame, 3 * i])
+        Y.append(df.iloc[frame, 3 * i + 1])
+        Z.append(df.iloc[frame, 3 * i + 2])
 
     i = 0
     joints_mp = [
@@ -71,46 +78,46 @@ def plot_frame(frame, df, joints_number, joints_name, ax):
     ax.scatter(X[0], Y[0], Z[0], marker="X", s=100)
 
     ax.plot3D(
-        X[1:6],
-        Y[1:6],
-        Z[1:6],
+        [X[0], X[30], X[9], X[29], X[8], X[22]],
+        [Y[0], Y[30], Y[9], Y[29], Y[8], Y[22]],
+        [Z[0], Z[30], Z[9], Z[29], Z[8], Z[22]],
+        color="purple",
+        linestyle="-",
+        linewidth=2,
+        label="Spine",
+    )
+    ax.plot3D(
+        [X[6], X[2], X[12], X[4], X[13]],
+        [Y[6], Y[2], Y[12], Y[4], Y[13]],
+        [Z[6], Z[2], Z[12], Z[4], Z[13]],
         color="red",
         linestyle="-",
         linewidth=2,
         label="Leg-Left",
     )
     ax.plot3D(
-        X[6:11],
-        Y[6:11],
-        Z[6:11],
+        [X[20], X[16], X[25], X[18], X[26]],
+        [Y[20], Y[16], Y[25], Y[18], Y[26]],
+        [Z[20], Z[16], Z[25], Z[18], Z[26]],
         color="blue",
         linestyle="-",
         linewidth=2,
         label="Leg-Right",
     )
     ax.plot3D(
-        X[11:17],
-        Y[11:17],
-        Z[11:17],
+        [X[1], X[7], X[10], X[14], X[5], X[11], X[3]],
+        [Y[1], Y[7], Y[10], Y[14], Y[5], Y[11], Y[3]],
+        [Z[1], Z[7], Z[10], Z[14], Z[5], Z[11], Z[3]],
         color="green",
-        linestyle="-",
-        linewidth=2,
-        label="Spine",
-    )
-    ax.plot3D(
-        X[17:23],
-        Y[17:23],
-        Z[17:23],
-        color="cyan",
         linestyle="-",
         linewidth=2,
         label="Arm-Left",
     )
     ax.plot3D(
-        X[24:30],
-        Y[24:30],
-        Z[24:30],
-        color="purple",
+        [X[15], X[21], X[23], X[27], X[19], X[24], X[17]],
+        [Y[15], Y[21], Y[23], Y[27], Y[19], Y[24], Y[17]],
+        [Z[15], Z[21], Z[23], Z[27], Z[19], Z[24], Z[17]],
+        color="cyan",
         linestyle="-",
         linewidth=2,
         label="Arm-Right",
@@ -118,9 +125,9 @@ def plot_frame(frame, df, joints_number, joints_name, ax):
     ax.set_xlabel("X-axis")
     ax.set_ylabel("Y-axis")
     ax.set_zlabel("Z-axis")
-    ax.set_xlim(-15, 15)
-    ax.set_ylim(0, 30)
-    ax.set_zlim(-15, 15)
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(0, 4)
+    ax.set_zlim(-2, 2)
     return
 
 
@@ -134,7 +141,7 @@ def plot_2d(frame, df, joints):
         Y.append(df.iloc[frame, 2 * i + 1])
 
     i = 0
-    for joint in joints.values():
+    for joint in joints:
         if joint == "head":
             marker, size = "o", 500
         else:
@@ -143,41 +150,41 @@ def plot_2d(frame, df, joints):
         i += 1
 
     plt.plot(
-        X[0:4],
-        Y[0:4],
+        [X[1], X[7], X[3], X[8]],
+        [Y[1], Y[7], Y[3], Y[8]],
         color="red",
         linestyle="-",
         linewidth=2,
         label="Leg-Left",
     )
     plt.plot(
-        X[4:8],
-        Y[4:8],
+        [X[10], X[16], X[12], X[17]],
+        [Y[10], Y[16], Y[12], Y[17]],
         color="blue",
         linestyle="-",
         linewidth=2,
         label="Leg-Right",
     )
     plt.plot(
-        X[9:14],
-        Y[9:14],
+        [X[4], X[5], X[9], X[6], X[2]],
+        [Y[4], Y[5], Y[9], Y[6], Y[2]],
         color="green",
         linestyle="-",
         linewidth=2,
         label="Arm-Left",
     )
     plt.plot(
-        X[14:19],
-        Y[14:19],
-        color="purple",
+        [X[13], X[14], X[18], X[15], X[11]],
+        [Y[13], Y[14], Y[18], Y[15], Y[11]],
+        color="cyan",
         linestyle="-",
         linewidth=2,
-        label="Arm-right",
+        label="Arm-Right",
     )
     plt.plot(
-        [X[0], X[4], X[14], X[9], X[0]],
-        [Y[0], Y[4], Y[14], Y[9], Y[0]],
-        color="cyan",
+        [X[13], X[4], X[1], X[10], X[13]],
+        [Y[13], Y[4], Y[1], Y[10], Y[13]],
+        color="purple",
         linestyle="-",
         linewidth=2,
         label="Torso",
@@ -186,6 +193,7 @@ def plot_2d(frame, df, joints):
     plt.ylabel("y")
     plt.xlim([0, 0.01])
     plt.ylim([0, 0.01])
+    plt.legend()
     return
 
 
@@ -217,33 +225,57 @@ def CMU_to_MPipe():
 if __name__ == "__main__":
     file_pos = "data/01_01_pos.csv"
     file_rot = "data/01_01_rot.csv"
-    df, df_pos, df_rot, joints_number, joints_name = read_data(
+    df, df_pos, df_rot, joints_number, joints_name = read_CMU_data(
         file_pos=file_pos, file_rot=file_rot
     )
-    print(joints_name)
 
     df_2d = pd.read_csv("data/01_01_2d.csv")
-    print(df_2d.iloc[0, 3])
-    fig = plt.figure()
-    """
+
+    df_col_chose = df_pos.columns.difference(["time"])
+    df_2d_col_chose = df_2d.columns.difference(["time"])
+
+    print(df_col_chose)
+    print(df_2d_col_chose)
+
+    df_2d = df_2d[df_2d_col_chose]
+    df_pos = df_pos[df_col_chose]
+
+    joints_2d = []
+    for i in range(int(len(df_2d.columns) / 2)):
+        joints_2d.append(df_2d.columns[2 * i][:-2])
+
+    joints_3d = []
+    for i in range(int(len(df_pos.columns) / 3)):
+        joints_3d.append(df_pos.columns[3 * i][:-2])
+
+    print(joints_2d)
+    print(joints_3d)
+    print(df_pos)
+    # 3D animation
+    fig = plt.figure(1)
     ax = fig.add_subplot(111, projection="3d")
-    plot_frame(
-        frame=0, df=df, joints_number=joints_number, joints_name=joints_name, ax=ax
+    plot_3d(
+        frame=0,
+        df=df_pos,
+        joints_number=joints_number,
+        joints_name=joints_3d,
+        ax=ax,
     )
-    """
+    plt.legend()
     """
     ani = animation.FuncAnimation(
         fig=fig,
-        func=plot_frame,
+        func=plot_3d,
         fargs=(df, joints_number, joints_name, ax),
         interval=8.333,
-    )"""
-    # plot_2d(frame=0, df=df_2d, joints=CMU_to_MPipe())
+    )
+    """
+    # 2D animation
+    fig = plt.figure(2)
     ani = animation.FuncAnimation(
         fig=fig,
         func=plot_2d,
-        fargs=(df_2d, CMU_to_MPipe()),
+        fargs=(df_2d, joints_2d),
         interval=8.333,
     )
-    plt.legend()
     plt.show()

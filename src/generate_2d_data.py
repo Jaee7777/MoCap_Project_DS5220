@@ -1,4 +1,5 @@
 import pandas as pd
+import sys
 
 
 def CMU_to_MPipe():
@@ -27,7 +28,8 @@ def CMU_to_MPipe():
 
 
 def pic_3d_to_2d(x_3d, y_3d, z_3d, f=1):
-    scale = (1.0 / 0.45) * 2.54 / 100.0  # scale from CMU mocap.
+    scale = 1
+    # scale = (1.0 / 0.45) * 2.54 / 100.0  # scale from CMU mocap.
     ratio = f / (scale * z_3d + 10)
     x_2d = scale * ratio * x_3d
     y_2d = scale * ratio * y_3d
@@ -59,7 +61,10 @@ def csv_3d_to_2d(list_i, file="data/01_01_pos.csv", focal_length=1):
 
 
 if __name__ == "__main__":
-    file_pos = "data/01_01_pos.csv"
-    dict = CMU_to_MPipe()
-    df_2d = csv_3d_to_2d(list(dict.keys()), file=file_pos, focal_length=0.05)
-    df_2d.to_csv("data/01_01_2d.csv", index=False, float_format="%.5f")
+    # This script requires 2 inputs: input 3d csv file name and output 2d csv file name.
+    if len(sys.argv) > 1:
+        dict = CMU_to_MPipe()
+        df_2d = csv_3d_to_2d(list(dict.keys()), file=sys.argv[1], focal_length=0.05)
+        df_2d.to_csv(sys.argv[2], index=False, float_format="%.5f")
+    else:
+        print("No input received.")
