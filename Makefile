@@ -111,3 +111,6 @@ regression:
 
 train_full_model:
 	python3 -B src/train_full_model.py
+
+start_mocap:
+	python3 -B src/mocap_webcam.py

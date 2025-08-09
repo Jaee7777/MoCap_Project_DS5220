@@ -18,8 +18,19 @@ install_amc2bvh
 
 * Make sure [bvh-toolbox](https://github.com/OlafHaag/bvh-toolbox) is properly installed from importing the dependencies of this repo.
 
+
+
+
 * Make sure to check if there is any update on [CMU MoCap](https://mocap.cs.cmu.edu/), [amc2bvh](https://github.com/thcopeland/amc2bvh) and/or [bvh-toolbox](https://github.com/OlafHaag/bvh-toolbox) after this repo has been updated.
 
+* Webcam used had frames of 640 x 480.
+
+## Setup - WSL2
+- For WSL2 users, you need [usbipd-win](https://github.com/dorssel/usbipd-win) to connect the webcam (USB device) to WSL2 environment. Follow the repo's installation guide to bind and attach your webcam to WSL2 on the Windows side.
+- Then, you have to use following command on WSL2 command window and reopen WSL2:
+```
+sudo usermod -a -G video $USER
+```
 ## Generate Smaller Test Dataset
 * Following command can be used to convert amc/asf files into bvh files in the first folder '01.' Use it to make sure everything is working fine:
 ```
@@ -159,7 +170,7 @@ Testing Finished! Time taken: 0.0206 s
 * XGB model showed the third best performance, but the time it takes for prediction is still in the scale of seconds.
 * MLP model showed the forth best performance, which were still very good. It's best advantage was that the time it takes for prediction is in the scale of 0.01s, which can be used for real-time application.
 * Overall, it seems to be the models are the fastest in the order of MLP, XGB and Random Forest, and the models are the most accurate in the order of Random Forest, XGB and MLP.
-- The time shown here is based on the models applied to dataset in the scale of ~10,000 data points. In Real-Time situation, assuming 100FPS (very good FPS), the time should be divided by roughly 100. Then, the time for prediction for Real-Time become roughly:
+- The time shown here is based on the models applied to dataset in the scale of ~10,000 data points. In Real-Time situation, assuming 100FPS (very good Frame Per Second), the time should be divided by roughly 100, so that we can estimate the latency per second. Then, the time for prediction for Real-Time become roughly:
   - Random Forest: ~0.05s
   - XGB: ~0.02s
   - MLP: ~0.0005s
@@ -210,24 +221,39 @@ Testing Finished! Time taken: 927.5214 s
 ```
 - MLP model
   - MSE for smaller dataset: ~0.08
-  - Prediction time for 100FPS: ~0.0005s
+  - Prediction time for 100 frames: ~0.0005s
   - Less accurate, but the fastest for real-time application.
 - XGB
   - MSE for smaller dataset: ~0.03
-  - Prediction time for 100FPS: ~0.02s
+  - Prediction time for 100 frames: ~0.02s
   - The most accurate. Suitable for real-time application, but the highest latency.
 - Random Forest
   - MSE for smaller dataset: ~0.05
-  - Prediction time for 100FPS: ~0.01s
+  - Prediction time for 100 frames: ~0.01s
   - The second most accurated. Suitable for real-time application, but in the same scale of latency with that of XGB model.
 - KNN
   - MSE for smaller dataset: ~2e-6
-  - Prediction time for 100FPS: ~10s
+  - Prediction time for 100 frames: ~10s
   - Very accurate, but not suitable for real-time application.
 - Conclusion
-  - Use MLP model for real-time application where low latency is cruicial, where interaction with multiple people in sink is cruicial, such as multi-player gaming.
-  - Use XGB for real-time application where accurate motion capture is cruicial, such as virtual performances.
+  - Use MLP model for real-time application where low latency is cruicial and/or may require high FPS, where interaction with multiple people in sink is cruicial, such as multi-player gaming.
+  - Use XGB for real-time application where accurate motion capture is much more important than low latency, such as virtual performances.
+
+
 ## Motion Capture Using MediaPipe
+- [OpenCV](https://opencv.org/) is used for image capturing.
+- [MediaPipe](https://ai.google.dev/edge/mediapipe/solutions/guide) is used as a tool for initial motion capture to get joints' 2D data. Follow its guide for [Pose landmark detection](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/python) for more details.
+
+- MediaPipe has its own depth detection tool to obtain z-coordinates of poses. However, we will use only x and y coordinates since the purpose of this project is to test the custom 2D-to-3D pose estimation tool.
+
+- The model details can be found [here](https://storage.googleapis.com/mediapipe-assets/Model%20Card%20BlazePose%20GHUM%203D.pdf). Index number per joints can be found [here](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/index).
+
+- In future, a custom tool for 2D pose estimation from images may be created to replace MediaPipe. The purpose of this would be creating a faster tool to capture 2D pose landmarks without any inherent 3D estimation for lower latency.
+
+- Following command will start motion capturing with real-time webcam view and joint positions. Choose which model you want to use by specifing path to the model in the main script at the very bottom.
+```
+make start_mocap
+```
 
 ## UDP Data Streaming
 
