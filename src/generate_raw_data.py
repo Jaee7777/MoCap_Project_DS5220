@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # The input of this script is: input 3d csv files that you want to merge together, and output file name.
     if len(sys.argv) > 1:
         df1 = read_CMU_pos_data(sys.argv[1])
-        for i, file in enumerate(sys.arv):
+        for i, file in enumerate(sys.argv):
             if i > 0 and i < len(sys.argv) - 2:
                 df2 = read_CMU_pos_data(sys.argv[i + 1])
                 df1 = pd.concat([df1, df2], axis=0)

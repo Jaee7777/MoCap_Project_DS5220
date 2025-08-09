@@ -27,7 +27,8 @@ def read_CMU_data(file_pos="data/01_01_pos.csv", file_rot="data/01_01_rot.csv"):
     return df, df_pos, df_rot, joints_number, joints_name
 
 
-def plot_3d(frame, df, joints_number, joints_name, ax):
+def plot_3d(frame, df, joints_name, ax):
+    joints_number = int(len(df.columns) / 3)
     plt.cla()
     X = []
     Y = []
@@ -191,8 +192,8 @@ def plot_2d(frame, df, joints):
     )
     plt.xlabel("x")
     plt.ylabel("y")
-    plt.xlim([0, 0.01])
-    plt.ylim([0, 0.01])
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
     plt.legend()
     return
 
@@ -222,20 +223,43 @@ def CMU_to_MPipe():
     return dict
 
 
-if __name__ == "__main__":
-    file_pos = "data/01_01_pos.csv"
-    file_rot = "data/01_01_rot.csv"
-    df, df_pos, df_rot, joints_number, joints_name = read_CMU_data(
-        file_pos=file_pos, file_rot=file_rot
-    )
+def plotit(X_test, df_pred):
 
-    df_2d = pd.read_csv("data/01_01_2d.csv")
+    joints_2d = []
+    for i in range(int(len(X_test.columns) / 2)):
+        joints_2d.append(X_test.columns[2 * i][:-2])
+    joints_2d = sorted(joints_2d)
+
+    joints_3d = []
+    for i in range(int(len(df_pred.columns) / 3)):
+        joints_3d.append(df_pred.columns[3 * i][:-2])
+    joints_3d = sorted(joints_3d)
+
+    # 3D plot.
+    fig = plt.figure(1)
+    ax = fig.add_subplot(111, projection="3d")
+    plot_3d(
+        frame=1000,
+        df=df_pred,
+        joints_name=joints_3d,
+        ax=ax,
+    )
+    # 2D plot.
+    fig = plt.figure(2)
+    plot_2d(frame=1000, df=X_test, joints=joints_2d)
+    plt.legend()
+    plt.show()
+    return
+
+
+if __name__ == "__main__":
+    path_data_3d = "data/data_CMU_3d_01.csv"
+    path_data_2d = "data/data_CMU_2d_01.csv"
+    df_pos = pd.read_csv(path_data_3d)
+    df_2d = pd.read_csv(path_data_2d)
 
     df_col_chose = df_pos.columns.difference(["time"])
     df_2d_col_chose = df_2d.columns.difference(["time"])
-
-    print(df_col_chose)
-    print(df_2d_col_chose)
 
     df_2d = df_2d[df_2d_col_chose]
     df_pos = df_pos[df_col_chose]
@@ -243,17 +267,16 @@ if __name__ == "__main__":
     joints_2d = []
     for i in range(int(len(df_2d.columns) / 2)):
         joints_2d.append(df_2d.columns[2 * i][:-2])
+    joints_2d = sorted(joints_2d)
 
     joints_3d = []
     for i in range(int(len(df_pos.columns) / 3)):
         joints_3d.append(df_pos.columns[3 * i][:-2])
+    joints_3d = sorted(joints_3d)
 
-    print(joints_2d)
-    print(joints_3d)
-    print(df_pos)
-    # 3D animation
     fig = plt.figure(1)
     ax = fig.add_subplot(111, projection="3d")
+    """
     plot_3d(
         frame=0,
         df=df_pos,
@@ -261,21 +284,22 @@ if __name__ == "__main__":
         joints_name=joints_3d,
         ax=ax,
     )
-    plt.legend()
     """
-    ani = animation.FuncAnimation(
+    ani_3d = animation.FuncAnimation(
         fig=fig,
         func=plot_3d,
-        fargs=(df, joints_number, joints_name, ax),
+        fargs=(df_pos, joints_3d, ax),
         interval=8.333,
     )
-    """
+    plt.legend()
+
     # 2D animation
     fig = plt.figure(2)
-    ani = animation.FuncAnimation(
+    ani_2d = animation.FuncAnimation(
         fig=fig,
         func=plot_2d,
         fargs=(df_2d, joints_2d),
         interval=8.333,
     )
+    plt.legend()
     plt.show()

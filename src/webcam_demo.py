@@ -22,6 +22,14 @@ while cap.isOpened():
 
     # Draw pose landmarks
     if results.pose_landmarks:
+        # Extract 2D coordinates
+        for id, landmark in enumerate(results.pose_landmarks.landmark):
+            h, w, c = frame.shape
+            x, y = int(landmark.x * w), int(landmark.y * h)
+            # Access specific body parts by index (e.g., 0=nose, 11=left_shoulder)
+            if id == 0:  # Nose
+                print(f"Nose position: ({x}, {y})")
+
         mp_drawing.draw_landmarks(
             frame,
             results.pose_landmarks,
