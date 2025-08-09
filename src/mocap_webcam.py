@@ -7,7 +7,7 @@ import socket
 import time
 
 
-def start_mocap(model_path):
+def start_mocap(model_path, sock, server_address):
     mp_drawing = mp.solutions.drawing_utils
     mp_pose = mp.solutions.pose
     pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -119,10 +119,93 @@ def start_mocap(model_path):
                     ],
                 )
                 y_pred = model.predict(df)
-                y_pred_list = y_pred.tolist()  # In form of 1D nested list [[]]
+                # Convert prediction to the form Unity needs.
+                y_send = [
+                    # Head
+                    y_pred[0, 0],
+                    y_pred[0, 1],
+                    y_pred[0, 2],
+                    # Neck (upper neck)
+                    y_pred[0, 90],
+                    y_pred[0, 91],
+                    y_pred[0, 92],
+                    # Upper Spine (lower neck)
+                    y_pred[0, 27],
+                    y_pred[0, 28],
+                    y_pred[0, 29],
+                    # Mid Spine (Thorax)
+                    y_pred[0, 84],
+                    y_pred[0, 85],
+                    y_pred[0, 86],
+                    # Lower Spine (Upper back)
+                    y_pred[0, 87],
+                    y_pred[0, 88],
+                    y_pred[0, 89],
+                    # Hips (Root)
+                    y_pred[0, 66],
+                    y_pred[0, 67],
+                    y_pred[0, 68],
+                    # Left Shoulder (Clavicle)
+                    y_pred[0, 3],
+                    y_pred[0, 4],
+                    y_pred[0, 5],
+                    # Left Upper Arm (Shoulder/humerus)
+                    y_pred[0, 21],
+                    y_pred[0, 22],
+                    y_pred[0, 23],
+                    # Left Forearm (Elbow/radius)
+                    y_pred[0, 30],
+                    y_pred[0, 31],
+                    y_pred[0, 32],
+                    # Left Hand (Wrist)
+                    y_pred[0, 42],
+                    y_pred[0, 43],
+                    y_pred[0, 44],
+                    # Right Shoulder (Clavicle)
+                    y_pred[0, 45],
+                    y_pred[0, 46],
+                    y_pred[0, 47],
+                    # Right Upper Arm (Shoulder/humerus)
+                    y_pred[0, 63],
+                    y_pred[0, 64],
+                    y_pred[0, 65],
+                    # Right Forearm (Elbow/radius)
+                    y_pred[0, 69],
+                    y_pred[0, 70],
+                    y_pred[0, 71],
+                    # Right Hand (Wrist)
+                    y_pred[0, 42],
+                    y_pred[0, 43],
+                    y_pred[0, 44],
+                    # Left Thigh (Femur)
+                    y_pred[0, 6],
+                    y_pred[0, 7],
+                    y_pred[0, 8],
+                    # Left Shin (Tibia)
+                    y_pred[0, 36],
+                    y_pred[0, 37],
+                    y_pred[0, 38],
+                    # Left Foot
+                    y_pred[0, 12],
+                    y_pred[0, 13],
+                    y_pred[0, 14],
+                    # Right Thigh (Femur)
+                    y_pred[0, 48],
+                    y_pred[0, 49],
+                    y_pred[0, 50],
+                    # Right Shin (Tibia)
+                    y_pred[0, 75],
+                    y_pred[0, 76],
+                    y_pred[0, 77],
+                    # Right Foot
+                    y_pred[0, 54],
+                    y_pred[0, 55],
+                    y_pred[0, 56],
+                ]
+                string_send = ",".join(map(str, y_send))
 
                 # Send predicted 3D positions to UDP socket.
-                # sock.sendto(y_pred_list[0].encode("utf-8"), server_address)
+                sock.sendto(string_send.encode("utf-8"), server_address)
 
                 # time.sleep(1 / fps)  # Set FPS
 
@@ -148,9 +231,14 @@ def start_mocap(model_path):
 
 
 if __name__ == "__main__":
-    start_mocap(model_path="trained_model/MLP_model_all.joblib")
-    # start_mocap(model_path="trained_model/XGB_model_all.joblib")
 
     # Setup UDP
-    # sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    # server_address = ("localhost", 12345)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server_address = ("localhost", 12345)
+
+    start_mocap(
+        model_path="trained_model/MLP_model_all.joblib",
+        sock=sock,
+        server_address=server_address,
+    )
+    # start_mocap(model_path="trained_model/XGB_model_all.joblib")

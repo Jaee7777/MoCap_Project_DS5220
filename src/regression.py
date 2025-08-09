@@ -386,7 +386,6 @@ def test_trained_model(
 ):
 
     X_train, X_test, y_train, y_test = file_to_traintest(path_data_3d, path_data_2d)
-
     start_time = time.time()
     print("\n Testing Linear Regression Model...")
     model = joblib.load("trained_model/linear_regression_model.joblib")
@@ -451,6 +450,7 @@ def test_trained_model(
 
 if __name__ == "__main__":
     input1, input2 = "data/data_CMU_3d_01.csv", "data/data_CMU_2d_01.csv"
+
     print("\nHyperparameter Tuning:")
     linear_regression_tuning(input1, input2)
     ridge_search_alpha(input1, input2)
@@ -462,4 +462,5 @@ if __name__ == "__main__":
     print("\nSave model trained with hyperparameters found:")
     save_trained_model(input1, input2)
     print("\nTest the time it takes to run the trained models:")
+
     test_trained_model(input1, input2)

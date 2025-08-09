@@ -258,5 +258,6 @@ make start_mocap
 ## UDP Data Streaming
 
 ## Unity
+- Default X Bot avatar from [Mixamo](https://www.mixamo.com/) was used.
 
 ## References

@@ -64,14 +64,14 @@ def plot_3d(frame, df, joints_name, ax):
         "rthumb",
     ]
     for joint in joints_name:
-        if joint == "root":
-            marker, size = "X", 100
+        if joint == "upperback":
+            marker, size = "X", 200
         elif joint == "head":
             marker, size = "o", 500
         elif joint in joints_mp:
             marker, size = "o", 50
         else:
-            marker, size = "x", 100
+            marker, size = "x", 50
         ax.scatter(X[i], Y[i], Z[i], marker=marker, s=size, label=joints_name[i])
         # ax.scatter(X[i], Y[i], Z[i], marker="o", label=joints_name[i])
         i += 1
@@ -129,6 +129,7 @@ def plot_3d(frame, df, joints_name, ax):
     ax.set_xlim(-2, 2)
     ax.set_ylim(0, 4)
     ax.set_zlim(-2, 2)
+    ax.legend()
     return
 
 
@@ -291,7 +292,6 @@ if __name__ == "__main__":
         fargs=(df_pos, joints_3d, ax),
         interval=8.333,
     )
-    plt.legend()
 
     # 2D animation
     fig = plt.figure(2)
