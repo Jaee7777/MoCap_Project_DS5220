@@ -5,9 +5,13 @@ import pandas as pd
 import joblib
 import socket
 import time
+from csv_animation import plot_3d
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.animation as animation
 
 
-def start_mocap(model_path, sock, server_address):
+def start_mocap(model_path):  # , sock, server_address):
     mp_drawing = mp.solutions.drawing_utils
     mp_pose = mp.solutions.pose
     pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -120,6 +124,7 @@ def start_mocap(model_path, sock, server_address):
                 )
                 y_pred = model.predict(df)
                 # Convert prediction to the form Unity needs.
+                """
                 y_send = [
                     # Head
                     y_pred[0, 0],
@@ -202,12 +207,14 @@ def start_mocap(model_path, sock, server_address):
                     y_pred[0, 55],
                     y_pred[0, 56],
                 ]
-                string_send = ",".join(map(str, y_send))
+                """
+                # string_send = ",".join(map(str, y_send))
+                print(f"{y_pred[0, 0]:.4f}, {y_pred[0, 1]:.4f}, {y_pred[0, 2]:.4f}")
 
                 # Send predicted 3D positions to UDP socket.
-                sock.sendto(string_send.encode("utf-8"), server_address)
+                # sock.sendto(string_send.encode("utf-8"), server_address)
 
-                # time.sleep(1 / fps)  # Set FPS
+                # time.sleep(1 / 10)  # Set FPS
 
             # Draw pose landmarks.
             mp_drawing.draw_landmarks(
@@ -233,12 +240,13 @@ def start_mocap(model_path, sock, server_address):
 if __name__ == "__main__":
 
     # Setup UDP
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_address = ("localhost", 12345)
+    # sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # server_address = ("localhost", 12345)
 
-    start_mocap(
-        model_path="trained_model/MLP_model_all.joblib",
-        sock=sock,
-        server_address=server_address,
-    )
+    start_mocap(model_path="trained_model/MLP_model_all.joblib")
+    # start_mocap(model_path="trained_model/XGB_model_all.joblib")
+
+    # sock=sock,
+    # server_address=server_address,
+
     # start_mocap(model_path="trained_model/XGB_model_all.joblib")

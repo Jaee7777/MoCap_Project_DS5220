@@ -254,10 +254,36 @@ Testing Finished! Time taken: 927.5214 s
 ```
 make start_mocap
 ```
-
-## UDP Data Streaming
-
-## Unity
-- Default X Bot avatar from [Mixamo](https://www.mixamo.com/) was used.
+- Result
+  - MLP: It was capturing fast, but the prediction was not accurate enough for good motion capture, especially on predicted z-coordinates.
+  - XGB: Its capturing speed was relatively slow in real-time to even tell if it is good enough.
+- Conclusion
+  - Training with only one webcam is probably one of the main issue. At least two cameras with different angle will guarantee some z-depth information within the training dataset.
+  - Adding constraints on length between each joints, angle of each joints can rotate, etc. would enhance the training. It can be used for auto-generating labels for different positional data.
+  - Eventually would need to add 3D rotational data of each joints and/or body parts for more accurate motion capture.
+  - Overall, we would need much larger input data for training (Adding 3D rotational data and another webcam are already increasing the size of data by 4 times) and prediction. This means the latency will get worse for prediction, thus MLP would still be the better option over XGB.
 
 ## References
+- Seyed Abolfazl Ghasemzadeh, Alexandre Alahi, and Christophe De Vleeschouwer.
+“MPL: Lifting 3D Human Pose from Multi-view 2D Poses”. In: arXiv eprints
+(2024), arXiv–2408.
+
+- Julieta Martinez et al. “A simple yet effective baseline for 3d human pose
+estimation”. In: Proceedings of the IEEE international conference on computer
+vision. 2017, pp. 2640–2649.
+
+- Dario Pavllo et al. “3d human pose estimation in video with temporal convolutions
+and semi-supervised training”. In: Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition. 2019, pp. 7753–7762.
+
+- [CMU MoCap](https://mocap.cs.cmu.edu/)
+
+- [amc2bvh](https://github.com/thcopeland/amc2bvh)
+
+- [bvh-toolbox](https://github.com/OlafHaag/bvh-toolbox)
+
+- [usbipd](https://github.com/dorssel/usbipd-win)
+
+- [MediaPipe](https://ai.google.dev/edge/mediapipe/solutions/guide)
+
+- [OpenCV](https://opencv.org/)
