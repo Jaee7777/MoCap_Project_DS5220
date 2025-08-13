@@ -78,7 +78,7 @@ def ridge_search_alpha(
     X_train, X_test, y_train, y_test = file_to_traintest(path_data_3d, path_data_2d)
 
     # Parameters to search.
-    param_grid = {"alpha": [1e-8, 1e-7, 1e-6, 1e-5, 0.1, 1.0]}
+    param_grid = {"alpha": [1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 1.0]}
 
     # Apply regression and train.
     model = Ridge()
